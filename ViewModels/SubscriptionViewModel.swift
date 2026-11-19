@@ -66,6 +66,25 @@ final class SubscriptionViewModel: ObservableObject {
             $0 + $1.monthlyCost
         }
     }
+    var upcomingSubscriptions: [Subscription] {
+        let today = Calendar.current.startOfDay(for: Date())
+
+        let next30Days = Calendar.current.date(
+            byAdding: .day,
+            value: 30,
+            to: today
+        ) ?? today
+
+        return subscriptions
+            .filter {
+                $0.status == .active &&
+                $0.nextRenewalDate >= today &&
+                $0.nextRenewalDate <= next30Days
+            }
+            .sorted {
+                $0.nextRenewalDate < $1.nextRenewalDate
+            }
+    }
 
     // MARK: - Filtered Subscriptions
     var filteredSubscriptions: [Subscription] {

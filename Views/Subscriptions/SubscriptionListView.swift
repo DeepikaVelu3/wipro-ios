@@ -4,54 +4,68 @@ import SwiftUI
 struct SubscriptionListView: View {
 
     @ObservedObject var subscriptionViewModel: SubscriptionViewModel
-
     @State private var showingAddSubscription = false
+
+    private let purple = Color(red: 0.48, green: 0.16, blue: 0.95)
 
     var body: some View {
 
         NavigationStack {
 
-            VStack(spacing: 15) {
+            VStack(spacing: 13) {
 
-                // MARK: - Search Bar
-
-                HStack {
+                // Search Bar
+                HStack(spacing: 10) {
                     Image(systemName: "magnifyingglass")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(purple)
 
                     TextField(
                         "Search subscriptions",
                         text: $subscriptionViewModel.searchText
                     )
+                    .tint(purple)
                 }
-                .padding()
-                .background(Color(.secondarySystemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .padding(14)
+                .background(Color.purple.opacity(0.07))
+                .clipShape(RoundedRectangle(cornerRadius: 14))
                 .padding(.horizontal)
 
-                // MARK: - Category Filter
+              
+                // MARK: - Category Dropdown
+                HStack {
+                    Text("Category")
+                        .foregroundStyle(.secondary)
 
-                ScrollView(.horizontal, showsIndicators: false) {
+                    Spacer()
 
-                    HStack(spacing: 10) {
-
-                        categoryButton(title: "All", category: nil)
+                    Menu {
+                        Button("All Categories") {
+                            subscriptionViewModel.selectedCategory = nil
+                        }
 
                         ForEach(SubscriptionCategory.allCases) { category in
-                            categoryButton(
-                                title: category.rawValue,
-                                category: category
-                            )
+                            Button(category.rawValue) {
+                                subscriptionViewModel.selectedCategory = category
+                            }
                         }
+                    } label: {
+                        HStack {
+                            Text(subscriptionViewModel.selectedCategory?.rawValue ?? "All Categories")
+                            Image(systemName: "chevron.down")
+                        }
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.primary)
+                        .padding(12)
+                        .background(Color(.secondarySystemBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
-                    .padding(.horizontal)
                 }
+                .padding(.horizontal)
 
-                // MARK: - Status Filter
-
+                // Status Filter
                 ScrollView(.horizontal, showsIndicators: false) {
-
-                    HStack(spacing: 10) {
+                    HStack(spacing: 9) {
 
                         statusButton(
                             title: "All Statuses",
@@ -68,15 +82,14 @@ struct SubscriptionListView: View {
                     .padding(.horizontal)
                 }
 
-                // MARK: - Subscription List
-
+                // Subscription List
                 if subscriptionViewModel.filteredSubscriptions.isEmpty {
 
                     Spacer()
 
                     Image(systemName: "creditcard")
-                        .font(.system(size: 50))
-                        .foregroundStyle(.secondary)
+                        .font(.system(size: 48))
+                        .foregroundStyle(purple.opacity(0.7))
 
                     Text("No subscriptions found")
                         .font(.headline)
@@ -90,23 +103,32 @@ struct SubscriptionListView: View {
                 } else {
 
                     List {
-
                         ForEach(
                             subscriptionViewModel.filteredSubscriptions
                         ) { subscription in
 
                             NavigationLink {
-
                                 EditSubscriptionView(
                                     subscription: subscription,
                                     subscriptionViewModel: subscriptionViewModel
                                 )
-
                             } label: {
-
                                 subscriptionRow(subscription)
                             }
                             .buttonStyle(.plain)
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
+                            .buttonStyle(.plain)
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(
+                                EdgeInsets(
+                                    top: 5,
+                                    leading: 14,
+                                    bottom: 5,
+                                    trailing: 14
+                                )
+                            )
                         }
                         .onDelete { indexSet in
 
@@ -114,7 +136,6 @@ struct SubscriptionListView: View {
                                 subscriptionViewModel.filteredSubscriptions
 
                             for index in indexSet {
-
                                 let subscription = items[index]
 
                                 subscriptionViewModel.deleteSubscription(
@@ -124,36 +145,39 @@ struct SubscriptionListView: View {
                         }
                     }
                     .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
                 }
             }
+            .padding(.top, 8)
+            .background(Color(.systemBackground))
             .navigationTitle("My Subscriptions")
+            .navigationBarTitleDisplayMode(.inline)
 
-            // MARK: - Add Subscription Button
-
+            // Add Subscription Button
             .toolbar {
-
                 ToolbarItem(placement: .topBarTrailing) {
-
                     Button {
                         showingAddSubscription = true
                     } label: {
-
                         Image(systemName: "plus")
-                            .font(.title2)
+                            .font(.title3)
                             .fontWeight(.semibold)
+                            .foregroundStyle(.white)
+                            .frame(width: 40, height: 40)
+                            .background(purple)
+                            .clipShape(Circle())
                     }
                 }
             }
 
-            // MARK: - Add Subscription Sheet
-
+            // Add Subscription Sheet
             .sheet(isPresented: $showingAddSubscription) {
-
                 AddSubscriptionView(
                     subscriptionViewModel: subscriptionViewModel
                 )
             }
         }
+        .tint(purple)
     }
 
     // MARK: - Category Filter Button
@@ -167,9 +191,7 @@ struct SubscriptionListView: View {
             subscriptionViewModel.selectedCategory == category
 
         return Button {
-
             subscriptionViewModel.selectedCategory = category
-
         } label: {
 
             Text(title)
@@ -179,8 +201,8 @@ struct SubscriptionListView: View {
                 .padding(.vertical, 9)
                 .background(
                     isSelected
-                    ? Color.blue
-                    : Color(.secondarySystemBackground)
+                    ? purple
+                    : Color.purple.opacity(0.07)
                 )
                 .foregroundStyle(isSelected ? .white : .primary)
                 .clipShape(Capsule())
@@ -198,9 +220,7 @@ struct SubscriptionListView: View {
             subscriptionViewModel.selectedStatus == status
 
         return Button {
-
             subscriptionViewModel.selectedStatus = status
-
         } label: {
 
             Text(title)
@@ -210,12 +230,29 @@ struct SubscriptionListView: View {
                 .padding(.vertical, 9)
                 .background(
                     isSelected
-                    ? Color.blue
-                    : Color(.secondarySystemBackground)
+                    ? purple
+                    : Color.purple.opacity(0.07)
                 )
                 .foregroundStyle(isSelected ? .white : .primary)
                 .clipShape(Capsule())
         }
+    }
+
+    // MARK: - Subscription Logo
+
+    private func logoName(for serviceName: String) -> String? {
+
+        let name = serviceName.lowercased()
+
+        if name.contains("netflix") {
+            return "Netflix"
+        } else if name.contains("spotify") {
+            return "Spotify"
+        } else if name.contains("gcp") || name.contains("google cloud") {
+            return "GCP"
+        }
+
+        return nil
     }
 
     // MARK: - Subscription Row
@@ -226,17 +263,32 @@ struct SubscriptionListView: View {
 
         HStack(spacing: 12) {
 
-            Image(systemName: "creditcard.fill")
-                .font(.title2)
-                .foregroundStyle(.blue)
-                .frame(width: 45, height: 45)
-                .background(Color.blue.opacity(0.12))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+            // Service Logo
+            Group {
+                if let assetName = logoName(for: subscription.serviceName) {
 
-            VStack(alignment: .leading, spacing: 5) {
+                    Image(assetName)
+                        .resizable()
+                        .scaledToFit()
+                        .padding(5)
+
+                } else {
+
+                    Image(systemName: "creditcard.fill")
+                        .font(.title2)
+                        .foregroundStyle(purple)
+                }
+            }
+            .frame(width: 48, height: 48)
+            .background(Color.purple.opacity(0.07))
+            .clipShape(RoundedRectangle(cornerRadius: 13))
+
+            // Subscription Information
+            VStack(alignment: .leading, spacing: 4) {
 
                 Text(subscription.serviceName)
                     .font(.headline)
+                    .foregroundStyle(.primary)
 
                 Text(subscription.category.rawValue)
                     .font(.caption)
@@ -244,16 +296,23 @@ struct SubscriptionListView: View {
 
                 Text(subscription.status.rawValue)
                     .font(.caption)
-                    .fontWeight(.medium)
+                    .fontWeight(.semibold)
                     .foregroundStyle(
                         subscription.status == .active
-                        ? .green
+                        ? purple
                         : .secondary
                     )
+
+                Text(
+                    "Renews on \(subscription.nextRenewalDate.formatted(date: .abbreviated, time: .omitted))"
+                )
+                .font(.caption2)
+                .foregroundStyle(.secondary)
             }
 
-            Spacer()
+            Spacer(minLength: 5)
 
+            // Subscription Cost
             VStack(alignment: .trailing, spacing: 5) {
 
                 Text(
@@ -261,13 +320,17 @@ struct SubscriptionListView: View {
                     format: .currency(code: "INR")
                 )
                 .font(.headline)
+                .foregroundStyle(.primary)
 
                 Text(subscription.billingCycle.rawValue)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
         }
-        .padding(.vertical, 6)
+        .padding(12)
+        .background(Color.purple.opacity(0.045))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .contentShape(RoundedRectangle(cornerRadius: 16))
     }
 }
 
@@ -276,4 +339,3 @@ struct SubscriptionListView: View {
         subscriptionViewModel: SubscriptionViewModel()
     )
 }
-

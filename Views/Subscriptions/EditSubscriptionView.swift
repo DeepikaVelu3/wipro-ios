@@ -4,6 +4,7 @@ import SwiftUI
 struct EditSubscriptionView: View {
 
     @ObservedObject var subscriptionViewModel: SubscriptionViewModel
+
     @Environment(\.dismiss) private var dismiss
 
     @State private var subscription: Subscription
@@ -19,8 +20,11 @@ struct EditSubscriptionView: View {
     }
 
     var body: some View {
+
         NavigationStack {
+
             Form {
+
                 Section("Subscription Details") {
 
                     TextField(
@@ -79,13 +83,16 @@ struct EditSubscriptionView: View {
                 }
 
                 Section {
+
                     Button("Save Changes") {
                         saveChanges()
                     }
                     .frame(maxWidth: .infinity)
                     .fontWeight(.semibold)
                 }
+
                 Section {
+
                     Button(role: .destructive) {
                         showDeleteConfirmation = true
                     } label: {
@@ -96,13 +103,6 @@ struct EditSubscriptionView: View {
             }
             .navigationTitle("Edit Subscription")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-            }
             .alert(
                 "Delete Subscription?",
                 isPresented: $showDeleteConfirmation

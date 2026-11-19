@@ -23,11 +23,7 @@ struct ContentView: View {
         }
         .animation(.easeInOut, value: authViewModel.isAuthenticated)
         .animation(.easeInOut, value: authViewModel.showLoginScreen)
-        .onAppear {
-            if !authViewModel.isAuthenticated {
-                authViewModel.checkAuthentication()
-            }
-        }
+        
     }
 }
 

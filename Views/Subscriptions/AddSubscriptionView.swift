@@ -4,8 +4,9 @@ import SwiftUI
 struct AddSubscriptionView: View {
 
     @ObservedObject var subscriptionViewModel: SubscriptionViewModel
+
     @Environment(\.dismiss) private var dismiss
-    
+
     @State private var serviceName = ""
     @State private var category: SubscriptionCategory = .entertainment
     @State private var cost = ""
@@ -13,11 +14,12 @@ struct AddSubscriptionView: View {
     @State private var startDate = Date()
     @State private var notes = ""
     @State private var status: SubscriptionStatus = .active
-
     @State private var errorMessage: String?
 
     var body: some View {
+
         NavigationStack {
+
             Form {
 
                 Section("Subscription Details") {
@@ -78,9 +80,13 @@ struct AddSubscriptionView: View {
             .navigationTitle("Add Subscription")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
                         dismiss()
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.headline)
+                            .foregroundStyle(.purple)
                     }
                 }
             }
@@ -88,6 +94,7 @@ struct AddSubscriptionView: View {
     }
 
     // MARK: - Save Subscription
+
     private func saveSubscription() {
 
         guard !serviceName.trimmingCharacters(
